@@ -20,6 +20,12 @@ export class User {
 
   @Prop()
   resetCodeExpires?: Date;
+
+  @Prop()
+  isVerified?: Boolean;
+  
+  @Prop()
+  verificationCode?: string;
 }
 
 export type UserDocument = User & Document;

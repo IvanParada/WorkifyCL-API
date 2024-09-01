@@ -19,6 +19,17 @@ export class AuthController {
     }
   }
 
+  @Post('verify-email')
+  async verifyEmail(@Body('email') email: string, @Body('code') code: string): Promise<{ message: string }> {
+    const isVerified = await this.authService.verifyEmail(email, code);
+    
+    if (isVerified) {
+      return { message: 'Cuenta verificada con éxito.' };
+    } else {
+      return { message: 'Código de verificación inválido.' };
+    }
+  }
+
   @Post('login')
   async login(@Body() loginUserDto: LoginUserDto, @Res() res: Response) {
     try {

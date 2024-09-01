@@ -41,23 +41,76 @@ export class AuthService {
 
   async signup(createUserDto: CreateUserDto): Promise<User> {
     const { email, password, ...rest } = createUserDto;
+    
+    let user = await this.userModel.findOne({ email }).exec();
+    
+    if (user) {
+      if (!user.isVerified) {
+        user.verificationCode = this.generateVerificationCode();
+        await user.save();
+        await this.sendVerificationEmail(user.email, user.verificationCode);
+      }
+      throw new Error('El usuario ya está registrado, pero no verificado. Se ha enviado un nuevo código de verificación.');
+    }
+    
     const hashedPassword = await bcrypt.hash(password, 12);
+    const verificationCode = this.generateVerificationCode();
     const createdUser = new this.userModel({
       email,
       password: hashedPassword,
+      isVerified: false,
+      verificationCode,
       ...rest,
     });
-    return createdUser.save();
+    await createdUser.save();
+    
+    await this.sendVerificationEmail(email, verificationCode);
+    
+    return createdUser;
   }
 
   async signin(loginUserDto: LoginUserDto): Promise<string> {
     const { email, password } = loginUserDto;
     const user = await this.userModel.findOne({ email }).exec();
+    
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new Error('Invalid credentials');
+      throw new Error('Credenciales inválidas');
     }
+
+    if (!user.isVerified) {
+      throw new Error('La cuenta no ha sido verificada. Por favor, revisa tu correo electrónico.');
+    }
+
     return this.jwtService.sign({ email: user.email, sub: user._id });
   }
+
+
+  async verifyEmail(email: string, verificationCode: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ email, verificationCode }).exec();
+    
+    if (!user) {
+      throw new Error('Código de verificación inválido.');
+    }
+
+    user.isVerified = true;
+    user.verificationCode = null; 
+    await user.save();
+    
+    return true;
+  }
+
+  private generateVerificationCode(): string {
+    return crypto.randomBytes(3).toString('hex');
+  }
+
+  private async sendVerificationEmail(email: string, code: string): Promise<void> {
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Verifica tu cuenta',
+      text: `Tu código de verificación es: ${code}`,
+    });
+  }
+
 
   async resetPassword(resetCode: string, newPassword: string): Promise<void> {
     const user = await this.userModel
