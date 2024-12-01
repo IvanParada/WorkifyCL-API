@@ -81,7 +81,7 @@ export class AuthService {
       throw new Error('La cuenta no ha sido verificada. Por favor, revisa tu correo electrónico.');
     }
 
-    return this.jwtService.sign({ email: user.email, sub: user._id });
+    return this.jwtService.sign({ email: user.email, sub: user._id },{expiresIn: '1m'});
   }
 
 
