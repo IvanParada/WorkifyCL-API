@@ -8,7 +8,8 @@ import { UpdatePostDto } from './dto/update-post.dto';
 @Injectable()
 export class PostsService {
   constructor(@InjectModel(PostEntity.name) private readonly postModel: Model<PostDocument>) {}
-
+//TODO: ADD SERVICE - FILTERED AND SEARCH
+//TODO: ADD IMGS IN CREATE POST
   async create(createPostDto: CreatePostDto): Promise<PostEntity> {
     const createdPost = new this.postModel(createPostDto);
     return createdPost.save();
