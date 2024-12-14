@@ -1,8 +1,8 @@
 import { Controller, Post, Body, Res, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.services';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { Response } from 'express';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
