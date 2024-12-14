@@ -17,7 +17,7 @@ export class AuthService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async requestPasswordReset(email: string): Promise<void> {
+  async requestPasswordReset(email: string): Promise<String> {
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
       throw new Error('User not found');
@@ -37,6 +37,8 @@ export class AuthService {
       subject: 'Password Reset Request',
       text: `To reset your password, please use the following code: ${resetCode}. This code will expire in 1 hour.`,
     });
+
+    return user.resetCode;
   }
 
   async signup(createUserDto: CreateUserDto): Promise<User> {
@@ -81,7 +83,7 @@ export class AuthService {
       throw new Error('La cuenta no ha sido verificada. Por favor, revisa tu correo electrónico.');
     }
 
-    return this.jwtService.sign({ email: user.email, sub: user._id },{expiresIn: '1m'});
+    return this.jwtService.sign({ email: user.email, sub: user._id },{expiresIn: '24h'});
   }
 
 

@@ -43,8 +43,10 @@ export class AuthController {
   @Post('request-reset-password')
   async requestPasswordReset(@Body('email') email: string, @Res() res: Response) {
     try {
-      await this.authService.requestPasswordReset(email);
-      return res.status(HttpStatus.OK).json({ message: 'Password reset email sent' });
+      
+      const code = await this.authService.requestPasswordReset(email);
+
+      return res.status(HttpStatus.OK).json({ code: `${code}` });
     } catch (error) {
       return res.status(HttpStatus.BAD_REQUEST).json({ message: error.message });
     }
