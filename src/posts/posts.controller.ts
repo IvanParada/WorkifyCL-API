@@ -13,7 +13,8 @@ export class PostsController {
   @Post()
   async create(@Body() createPostDto: CreatePostDto, @Req() req: Request){
     const authorId = req['user'];
-    return this.postsService.create(createPostDto, authorId);
+    await this.postsService.create(createPostDto, authorId);
+    return { message: 'Post created successfully'}
   }
 
   @Get()

@@ -14,6 +14,10 @@ export class CreatePostDto {
 
   @IsString()
   @IsNotEmpty()
+  paymentType: string;
+
+  @IsString()
+  @IsNotEmpty()
   @MinLength(50)
   @MaxLength(150)
   description: string;

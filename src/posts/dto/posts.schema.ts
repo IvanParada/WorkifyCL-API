@@ -12,6 +12,9 @@ export class PostEntity {
   @Prop({ required: true})
   price: number;
 
+  @Prop({ required: true})
+  paymentType: string;
+
   @Prop({ required: true, minlength: 50, maxlength: 150 })
   description: string;
   
@@ -29,6 +32,7 @@ export class PostEntity {
   
   @Prop({ default: Date.now })
   createdAt: Date;
+
 }
 
 export type PostDocument = PostEntity & Document;
