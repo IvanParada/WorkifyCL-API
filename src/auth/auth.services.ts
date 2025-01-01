@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -42,7 +42,36 @@ export class AuthService {
   }
 
   async signup(createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, ...rest } = createUserDto;
+
+    if(!createUserDto.name){
+      throw new InternalServerErrorException({message: 'Name user is required'});
+    }
+
+    if(createUserDto.name.length < 3 ){
+      throw new InternalServerErrorException({message: `Error with the name length. MinLength: 3, Current length: ${ createUserDto.name.length}` });
+    }
+
+    if(!createUserDto.phone){
+      throw new InternalServerErrorException({message: 'Phone user is required'});
+    }
+
+    if(createUserDto.phone.length !== 12){
+      throw new InternalServerErrorException({message: `Error with the phone length. Length exactly is 12, Current length: ${ createUserDto.phone.length}`});
+    }
+
+    if(!createUserDto.email){
+      throw new InternalServerErrorException({message: 'Email user is rquired'});
+    }
+
+    if(!createUserDto.password){
+      throw new InternalServerErrorException({message: 'Password user is required'});
+    }
+
+    if(createUserDto.password.length < 6){
+      throw new InternalServerErrorException({message: `Error with password length. MinLength: 6, Current length: ${ createUserDto.password.length}` });
+    }
+
+    const { name, phone, email, password, ...rest } = createUserDto;
     
     let user = await this.userModel.findOne({ email }).exec();
     
@@ -58,6 +87,8 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(password, 12);
     const verificationCode = this.generateVerificationCode();
     const createdUser = new this.userModel({
+      name,
+      phone,
       email,
       password: hashedPassword,
       isVerified: false,
